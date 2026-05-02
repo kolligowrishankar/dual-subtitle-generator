@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Dual Subtitle Generator",
+  "version": "2.0",
+  "description": "German + English dual subtitles on Netflix, Amazon Prime, YouTube and any website. No server needed.",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Dual Subtitle Generator"
+  },
+  "icons": {
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}
