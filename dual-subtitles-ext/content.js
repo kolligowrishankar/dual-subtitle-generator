@@ -61,7 +61,7 @@
     deEl.id = "dual-sub-de";
     Object.assign(deEl.style, {
       fontFamily: "'Segoe UI', Arial, sans-serif",
-      fontSize:   "2.2rem",
+      fontSize:   "28px", // Changed from rem to px for universal size
       fontWeight: "700",
       color:      "#FFD700",
       lineHeight: "1.4",
@@ -75,7 +75,7 @@
     enEl.id = "dual-sub-en";
     Object.assign(enEl.style, {
       fontFamily: "'Segoe UI', Arial, sans-serif",
-      fontSize:   "1.7rem",
+      fontSize:   "20px", // Changed from rem to px for universal size
       fontWeight: "400",
       color:      "#FFFFFF",
       lineHeight: "1.4",
@@ -99,8 +99,10 @@
     overlay.style.left   = r.left + "px";
     overlay.style.width  = r.width + "px";
     overlay.style.top    = "auto";
-    // Sit above native subtitle area
-    const bottomOffset = (isNetflix || isAmazon) ? 130 : 90;
+    
+    // Netflix needs 120px to clear its big UI, Amazon and YouTube sit lower
+    const bottomOffset = isNetflix ? 120 : (isAmazon ? 60 : 70);
+    
     overlay.style.bottom = (window.innerHeight - r.bottom + bottomOffset) + "px";
   }
 
@@ -355,7 +357,21 @@
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimer); resizeTimer = setTimeout(positionOverlay, 100);
     });
-    document.addEventListener("fullscreenchange", () => setTimeout(positionOverlay, 200));
+
+    // Handle moving the overlay when entering/exiting Full Screen
+    document.addEventListener("fullscreenchange", () => {
+      if (overlay) {
+        const fsElement = document.fullscreenElement;
+        if (fsElement) {
+          // Move our overlay inside the full-screen element so it stays on top
+          fsElement.appendChild(overlay);
+        } else {
+          // Move it back to the normal body when we exit full-screen
+          document.body.appendChild(overlay);
+        }
+      }
+      setTimeout(positionOverlay, 200);
+    });
 
     const platform = isYouTube ? "YouTube" : isNetflix ? "Netflix" : isAmazon ? "Prime Video" : "Generic";
     showStatus(`✅ DualSub active — ${platform} mode`, "rgba(0,120,60,0.9)", 4000);
