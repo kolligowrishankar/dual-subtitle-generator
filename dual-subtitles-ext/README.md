@@ -1,10 +1,10 @@
-# 🎬 Dual Subtitle Generator
+# Dual Subtitle Generator
 
 A Chrome extension that displays **German + English dual subtitles** side by side on YouTube, Netflix, Amazon Prime, and any website with a video. **No server required. No API key. No cost.**
 
 ---
 
-## ✅ Features
+##  Features
 
 - **YouTube** — auto-fetches German transcript and translates to English in real time
 - **Netflix** — reads German subtitles from the player, adds English translation below
@@ -16,7 +16,7 @@ A Chrome extension that displays **German + English dual subtitles** side by sid
 
 ---
 
-## 🚀 Installation (Local / Developer Mode)
+##  Installation (Local / Developer Mode)
 
 > No Python server needed. Everything runs inside Chrome.
 
@@ -29,7 +29,7 @@ A Chrome extension that displays **German + English dual subtitles** side by sid
 
 ---
 
-## 🎬 How to Use
+## How to Use
 
 ### YouTube
 Just open any German YouTube video. The extension automatically:
@@ -48,7 +48,7 @@ The extension detects `<video>` elements and common subtitle containers on any s
 
 ---
 
-## 📁 File Structure
+## File Structure
 
 ```
 dual-subtitles-ext/
@@ -64,7 +64,7 @@ dual-subtitles-ext/
 
 ---
 
-## 🔧 Troubleshooting
+##  Troubleshooting
 
 | Problem | Solution |
 |---|---|
@@ -77,9 +77,9 @@ dual-subtitles-ext/
 
 ---
 
-## 🌐 Publishing to GitHub (already done)
+##  Publishing to GitHub (already done)
 
-Your extension is live at:
+My extension is live at:
 **https://github.com/kolligowrishankar/dual-subtitle-generator**
 
 ### How to push future updates:
@@ -96,18 +96,18 @@ git push
 
 ---
 
-## ❓ Why no Chrome Web Store?
+##  Why no Chrome Web Store?
 
-Publishing to the Chrome Web Store requires a one-time $5 developer fee and a review process. For personal or educational use, loading directly from your local folder via Developer Mode works perfectly. Anyone who wants to use your extension can clone the GitHub repo and load it unpacked.
+Publishing to the Chrome Web Store requires a one-time $5 developer fee and a review process. For personal or educational use, loading directly from your local folder via Developer Mode works perfectly. Anyone who wants to use this extension can clone the GitHub repo and load it unpacked.
 
 ---
 
-## 🛠 How translation works
+##  How translation works
 
 Uses **Google Translate's free public endpoint** (`translate.googleapis.com`) — no API key, no account, no cost. Requests are made from the Chrome extension's background service worker, so there are no CORS issues.
 
 ---
 
-## 📜 License
+##  License
 
 MIT — free to use, modify, and share.
