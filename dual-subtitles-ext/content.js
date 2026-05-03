@@ -6,15 +6,9 @@
  *
  * Platform subtitle selectors:
  *   YouTube  → .ytp-caption-segment
- *   Netflix  → .player-timedtext span, [data-uia="player-timedtext"] span
+ *   Netflix  → .player-timedtext, [data-uia="player-timedtext"]
  *   Amazon   → .atvwebplayersdk-captions-text span, [class*="captions"] span
  *   Generic  → <track> elements, common subtitle class names
- *
- * Flow:
- *   1. Poll DOM every 100ms for subtitle text changes
- *   2. When text changes, send to background.js for translation (~150ms)
- *   3. Show German (original) + English (translated) in gold overlay
- *   4. Cache translations so same sentence is never translated twice
  */
 
 (function () {
@@ -61,7 +55,7 @@
     deEl.id = "dual-sub-de";
     Object.assign(deEl.style, {
       fontFamily: "'Segoe UI', Arial, sans-serif",
-      fontSize:   "28px", // Changed from rem to px for universal size
+      fontSize:   "28px", // Fixed pixel size for universal consistency
       fontWeight: "700",
       color:      "#FFD700",
       lineHeight: "1.4",
@@ -75,7 +69,7 @@
     enEl.id = "dual-sub-en";
     Object.assign(enEl.style, {
       fontFamily: "'Segoe UI', Arial, sans-serif",
-      fontSize:   "20px", // Changed from rem to px for universal size
+      fontSize:   "20px", // Fixed pixel size for universal consistency
       fontWeight: "400",
       color:      "#FFFFFF",
       lineHeight: "1.4",
@@ -221,18 +215,21 @@
     let text = "";
 
     if (isYouTube) {
-      // YouTube renders active captions into .ytp-caption-segment spans
       const segs = document.querySelectorAll(".ytp-caption-segment");
       text = Array.from(segs).map(e => e.textContent).join(" ").trim();
     }
 
     else if (isNetflix) {
-      const els = document.querySelectorAll(
-        ".player-timedtext-text-container span, " +
-        ".nfp-player-timedtext span, " +
-        "[data-uia='player-timedtext'] span"
+      // BRUTE FORCE FIX: Use querySelector (singular) to only grab the very FIRST subtitle layer it finds.
+      // This completely ignores the duplicate shadow layer underneath it.
+      const container = document.querySelector(
+        ".player-timedtext-text-container, " +
+        ".nfp-player-timedtext, " +
+        "[data-uia='player-timedtext']"
       );
-      text = Array.from(els).map(e => e.textContent).join(" ").trim();
+      if (container) {
+        text = container.textContent;
+      }
     }
 
     else if (isAmazon) {
@@ -245,7 +242,6 @@
     }
 
     else {
-      // Generic: try common subtitle container class names
       const els = document.querySelectorAll(
         ".vjs-text-track-display span, " +
         ".subtitle span, .subtitles span, " +
@@ -256,19 +252,17 @@
       text = Array.from(els).map(e => e.textContent).join(" ").trim();
     }
 
-    // Collapse whitespace
+    // Collapse whitespace so strings match cleanly
     return text.replace(/\s+/g, " ").trim();
   }
 
   // ── Translation via background.js ─────────────────────────────────────────
   function translateAndShow(german) {
-    // Check cache first — instant display for repeated lines
     if (cache.has(german)) {
       showCue(german, cache.get(german));
       return;
     }
 
-    // Show German immediately while translation loads
     showCue(german, "…");
     translating = true;
 
@@ -277,7 +271,6 @@
       if (res && res.ok && res.translated[0]) {
         const english = res.translated[0];
         cache.set(german, english);
-        // Only update if this is still the current subtitle
         if (lastGerman === german) showCue(german, english);
       }
     });
@@ -296,35 +289,14 @@
       return;
     }
 
-    if (german === lastGerman) return;  // no change
+    if (german === lastGerman) return; 
 
     lastGerman = german;
     translateAndShow(german);
   }
 
-  // ── Ping-retry helper ─────────────────────────────────────────────────────
-  function pingThenSend(payload, cb, tries) {
-    tries = tries === undefined ? MAX_RETRY : tries;
-    chrome.runtime.sendMessage({ type: "PING" }, () => {
-      if (chrome.runtime.lastError) {
-        if (tries > 0) setTimeout(() => pingThenSend(payload, cb, tries - 1), 800);
-        else cb({ ok: false, error: "Service worker unavailable" });
-        return;
-      }
-      chrome.runtime.sendMessage(payload, (res) => {
-        if (chrome.runtime.lastError) {
-          if (tries > 0) setTimeout(() => pingThenSend(payload, cb, tries - 1), 800);
-          else cb({ ok: false, error: chrome.runtime.lastError.message });
-          return;
-        }
-        cb(res || { ok: true });
-      });
-    });
-  }
-
   // ── Auto-Enable & Hide Native Captions ────────────────────────────────────
   function autoEnableAndHideNativeCaptions() {
-    // 1. Hide native text visually so they don't overlap, but keep them in DOM to read
     let style = document.getElementById("dual-sub-hide-native");
     if (!style) {
       style = document.createElement("style");
@@ -337,7 +309,6 @@
       document.head.appendChild(style);
     }
 
-    // 2. Auto-click the YouTube CC button if it is currently OFF
     if (isYouTube) {
       const ccBtn = document.querySelector('.ytp-subtitles-button');
       if (ccBtn && ccBtn.getAttribute('aria-pressed') === 'false') {
@@ -349,7 +320,7 @@
   // ── Init ──────────────────────────────────────────────────────────────────
   function start() {
     createOverlay();
-    autoEnableAndHideNativeCaptions(); // Hides native text and clicks CC automatically
+    autoEnableAndHideNativeCaptions();
 
     if (pollTimer) clearInterval(pollTimer);
     pollTimer = setInterval(tick, POLL_MS);
@@ -358,15 +329,12 @@
       clearTimeout(resizeTimer); resizeTimer = setTimeout(positionOverlay, 100);
     });
 
-    // Handle moving the overlay when entering/exiting Full Screen
     document.addEventListener("fullscreenchange", () => {
       if (overlay) {
         const fsElement = document.fullscreenElement;
         if (fsElement) {
-          // Move our overlay inside the full-screen element so it stays on top
           fsElement.appendChild(overlay);
         } else {
-          // Move it back to the normal body when we exit full-screen
           document.body.appendChild(overlay);
         }
       }
