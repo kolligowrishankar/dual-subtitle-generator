@@ -100,66 +100,115 @@
     overlay.style.bottom = (window.innerHeight - r.bottom + bottomOffset) + "px";
   }
 
-  // ── Word hover highlight ──────────────────────────────────────────────────
+  // ── Word hover — direct per-word translation ──────────────────────────────
+  // Instead of guessing position (wrong for German word-order differences),
+  // we translate the hovered word directly. Result shown in English line.
+  // Cache ensures each word is only translated once.
+  const wordCache = new Map();
+
   function renderWithHover(german, english) {
     const deEl = overlay.querySelector("#dual-sub-de");
     const enEl = overlay.querySelector("#dual-sub-en");
-    const deTok = german.split(/(\s+)/);
-    const enTok = english.split(/(\s+)/);
-    const deWords = deTok.filter(w => w.trim());
-    const enWords = enTok.filter(w => w.trim());
 
+    // Split into tokens preserving spaces
+    const deTok = german.split(/(\s+)/);
+
+    // Build German line with hoverable word spans
     deEl.innerHTML = "";
-    let di = 0;
     deTok.forEach(tok => {
       if (!tok.trim()) { deEl.appendChild(document.createTextNode(tok)); return; }
+
       const span = document.createElement("span");
       span.textContent = tok;
-      span.dataset.wi  = di;
-      Object.assign(span.style, { cursor: "pointer", borderRadius: "3px" });
+      span.dataset.word = tok;
+      Object.assign(span.style, {
+        cursor:       "pointer",
+        borderRadius: "3px",
+        transition:   "background 0.12s",
+      });
+
       span.addEventListener("mouseenter", () => {
         if (!isVideoPaused()) return;
         hoverActive = true;
-        highlightEn(parseInt(span.dataset.wi), deWords.length, enWords.length, enEl, enTok);
-        span.style.background = "rgba(255,215,0,0.3)";
-        span.style.color = "#fff";
+        span.style.background = "rgba(255,215,0,0.35)";
+        span.style.color      = "#fff";
+        showWordTranslation(tok, enEl, english);
       });
+
       span.addEventListener("mouseleave", () => {
         hoverActive = false;
         span.style.background = "";
-        span.style.color = "#FFD700";
-        clearEnHighlight(enEl);
+        span.style.color      = "#FFD700";
+        // Restore full English sentence
+        enEl.textContent = english;
+        Object.assign(enEl.style, { color: "#fff", fontSize: "20px" });
       });
+
       deEl.appendChild(span);
-      di++;
     });
 
-    renderEnPlain(enEl, enTok);
+    // English line: plain text initially
+    enEl.textContent = english;
+    Object.assign(enEl.style, { color: "#fff", fontSize: "20px" });
   }
 
-  function renderEnPlain(enEl, tokens) {
+  // Strip punctuation for cleaner translation
+  function cleanWord(w) {
+    return w.replace(/^[^a-zA-ZäöüÄÖÜß]+|[^a-zA-ZäöüÄÖÜß]+$/g, "");
+  }
+
+  function showWordTranslation(word, enEl, fullEnglish) {
+    const clean = cleanWord(word);
+    if (!clean) return;
+
+    // Show immediately from cache
+    if (wordCache.has(clean.toLowerCase())) {
+      renderWordResult(enEl, word, wordCache.get(clean.toLowerCase()), fullEnglish);
+      return;
+    }
+
+    // Show "translating…" placeholder
+    enEl.textContent = `${word} = …`;
+    Object.assign(enEl.style, { color: "#FFD700", fontSize: "18px" });
+
+    // Translate single word
+    chrome.runtime.sendMessage({ type: "TRANSLATE_BATCH", texts: [clean] }, res => {
+      if (res?.ok && res.translated[0]) {
+        const result = res.translated[0];
+        wordCache.set(clean.toLowerCase(), result);
+        // Only update if user is still hovering same word
+        if (hoverActive) renderWordResult(enEl, word, result, fullEnglish);
+      }
+    });
+  }
+
+  function renderWordResult(enEl, word, translation, fullEnglish) {
+    // Format: "konstruiert = designed"  in a clear highlighted style
     enEl.innerHTML = "";
-    let i = 0;
-    tokens.forEach(tok => {
-      if (!tok.trim()) { enEl.appendChild(document.createTextNode(tok)); return; }
-      const s = document.createElement("span");
-      s.textContent = tok; s.dataset.wi = i++;
-      enEl.appendChild(s);
+
+    const wSpan = document.createElement("span");
+    wSpan.textContent = cleanWord(word);
+    Object.assign(wSpan.style, { color: "#FFD700", fontWeight: "700" });
+
+    const eq = document.createTextNode(" = ");
+
+    const tSpan = document.createElement("span");
+    tSpan.textContent = translation;
+    Object.assign(tSpan.style, {
+      color:          "#FFE066",
+      fontWeight:     "700",
+      background:     "rgba(255,165,0,0.4)",
+      borderRadius:   "4px",
+      padding:        "0 6px",
     });
+
+    enEl.appendChild(wSpan);
+    enEl.appendChild(eq);
+    enEl.appendChild(tSpan);
+    Object.assign(enEl.style, { fontSize: "20px" });
   }
 
-  function highlightEn(di, dLen, eLen, enEl, enTok) {
-    clearEnHighlight(enEl);
-    if (!eLen || !dLen) return;
-    const ratio = eLen / dLen;
-    const eStart = Math.floor(di * ratio);
-    const eEnd   = Math.min(eLen - 1, Math.floor((di + 1) * ratio));
-    enEl.querySelectorAll("span").forEach(s => {
-      if (+s.dataset.wi >= eStart && +s.dataset.wi <= eEnd)
-        Object.assign(s.style, { background: "rgba(255,165,0,0.5)", color: "#FFE066", fontWeight: "700", borderRadius: "3px", padding: "0 2px" });
-    });
-  }
-
+  // Kept for compatibility (not used in new hover logic)
   function clearEnHighlight(enEl) {
     enEl.querySelectorAll("span").forEach(s => {
       s.style.background = s.style.color = s.style.fontWeight = s.style.padding = "";
