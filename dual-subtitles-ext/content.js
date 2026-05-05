@@ -1,20 +1,14 @@
 /**
- * content.js — Dual Subtitle Generator v3
+ * content.js — Dual Subtitle Generator v4
  *
- * NEW STRATEGY: Read subtitles directly from the DOM on ALL platforms.
- * No HTTP fetching, no transcript API, no parsing needed.
- *
- * Platform subtitle selectors:
- *   YouTube  → .ytp-caption-segment
- *   Netflix  → .player-timedtext, [data-uia="player-timedtext"]
- *   Amazon   → .atvwebplayersdk-captions-text span, [class*="captions"] span
- *   Generic  → <track> elements, common subtitle class names
+ * Fixed: Pointer-events blocking video timeline controls.
+ * Fixed: Amazon Prime duplicate text selection.
  */
 
 (function () {
   "use strict";
 
-  const POLL_MS  = 100;   // check for new subtitle text every 100ms
+  const POLL_MS  = 100;   
   const MAX_RETRY = 3;
 
   const host      = window.location.hostname;
@@ -30,7 +24,8 @@
   let lastGerman   = "";
   let lastEnglish  = "";
   let translating  = false;
-  const cache      = new Map();   // german → english translation cache
+  const cache      = new Map();   
+  const wordCache  = new Map();
 
   // ── Overlay ───────────────────────────────────────────────────────────────
   function createOverlay() {
@@ -43,7 +38,8 @@
       position:      "fixed",
       zIndex:        "2147483647",
       textAlign:     "center",
-      pointerEvents: "auto",
+      // FIX: Set to 'none' so clicks pass through to the Netflix/Prime timeline!
+      pointerEvents: "none", 
       padding:       "10px 24px",
       borderRadius:  "8px",
       background:    "rgba(0,0,0,0.72)",
@@ -55,7 +51,7 @@
     deEl.id = "dual-sub-de";
     Object.assign(deEl.style, {
       fontFamily: "'Segoe UI', Arial, sans-serif",
-      fontSize:   "28px", // Fixed pixel size for universal consistency
+      fontSize:   "28px", 
       fontWeight: "700",
       color:      "#FFD700",
       lineHeight: "1.4",
@@ -69,7 +65,7 @@
     enEl.id = "dual-sub-en";
     Object.assign(enEl.style, {
       fontFamily: "'Segoe UI', Arial, sans-serif",
-      fontSize:   "20px", // Fixed pixel size for universal consistency
+      fontSize:   "20px", 
       fontWeight: "400",
       color:      "#FFFFFF",
       lineHeight: "1.4",
@@ -94,26 +90,17 @@
     overlay.style.width  = r.width + "px";
     overlay.style.top    = "auto";
     
-    // Netflix needs 120px to clear its big UI, Amazon and YouTube sit lower
     const bottomOffset = isNetflix ? 120 : (isAmazon ? 60 : 70);
-    
     overlay.style.bottom = (window.innerHeight - r.bottom + bottomOffset) + "px";
   }
 
   // ── Word hover — direct per-word translation ──────────────────────────────
-  // Instead of guessing position (wrong for German word-order differences),
-  // we translate the hovered word directly. Result shown in English line.
-  // Cache ensures each word is only translated once.
-  const wordCache = new Map();
-
   function renderWithHover(german, english) {
     const deEl = overlay.querySelector("#dual-sub-de");
     const enEl = overlay.querySelector("#dual-sub-en");
 
-    // Split into tokens preserving spaces
     const deTok = german.split(/(\s+)/);
 
-    // Build German line with hoverable word spans
     deEl.innerHTML = "";
     deTok.forEach(tok => {
       if (!tok.trim()) { deEl.appendChild(document.createTextNode(tok)); return; }
@@ -125,6 +112,8 @@
         cursor:       "pointer",
         borderRadius: "3px",
         transition:   "background 0.12s",
+        // FIX: Set words back to 'auto' so the hover feature still works!
+        pointerEvents: "auto", 
       });
 
       span.addEventListener("mouseenter", () => {
@@ -139,7 +128,6 @@
         hoverActive = false;
         span.style.background = "";
         span.style.color      = "#FFD700";
-        // Restore full English sentence
         enEl.textContent = english;
         Object.assign(enEl.style, { color: "#fff", fontSize: "20px" });
       });
@@ -147,12 +135,10 @@
       deEl.appendChild(span);
     });
 
-    // English line: plain text initially
     enEl.textContent = english;
     Object.assign(enEl.style, { color: "#fff", fontSize: "20px" });
   }
 
-  // Strip punctuation for cleaner translation
   function cleanWord(w) {
     return w.replace(/^[^a-zA-ZäöüÄÖÜß]+|[^a-zA-ZäöüÄÖÜß]+$/g, "");
   }
@@ -161,29 +147,24 @@
     const clean = cleanWord(word);
     if (!clean) return;
 
-    // Show immediately from cache
     if (wordCache.has(clean.toLowerCase())) {
       renderWordResult(enEl, word, wordCache.get(clean.toLowerCase()), fullEnglish);
       return;
     }
 
-    // Show "translating…" placeholder
     enEl.textContent = `${word} = …`;
     Object.assign(enEl.style, { color: "#FFD700", fontSize: "18px" });
 
-    // Translate single word
     chrome.runtime.sendMessage({ type: "TRANSLATE_BATCH", texts: [clean] }, res => {
       if (res?.ok && res.translated[0]) {
         const result = res.translated[0];
         wordCache.set(clean.toLowerCase(), result);
-        // Only update if user is still hovering same word
         if (hoverActive) renderWordResult(enEl, word, result, fullEnglish);
       }
     });
   }
 
   function renderWordResult(enEl, word, translation, fullEnglish) {
-    // Format: "konstruiert = designed"  in a clear highlighted style
     enEl.innerHTML = "";
 
     const wSpan = document.createElement("span");
@@ -208,13 +189,6 @@
     Object.assign(enEl.style, { fontSize: "20px" });
   }
 
-  // Kept for compatibility (not used in new hover logic)
-  function clearEnHighlight(enEl) {
-    enEl.querySelectorAll("span").forEach(s => {
-      s.style.background = s.style.color = s.style.fontWeight = s.style.padding = "";
-    });
-  }
-
   function isVideoPaused() {
     const v = getVideoElement(); return v ? v.paused : true;
   }
@@ -230,7 +204,6 @@
     if (!hoverActive && overlay) overlay.style.display = "none";
   }
 
-  // ── Status banner ─────────────────────────────────────────────────────────
   function showStatus(msg, color, autohide) {
     let b = document.getElementById("dual-sub-status");
     if (!b) {
@@ -252,7 +225,6 @@
     if (autohide) setTimeout(() => { b.style.display = "none"; }, autohide);
   }
 
-  // ── Video element ─────────────────────────────────────────────────────────
   function getVideoElement() {
     const all = Array.from(document.querySelectorAll("video"));
     return all.find(v => !v.paused && v.readyState >= 2)
@@ -269,8 +241,6 @@
     }
 
     else if (isNetflix) {
-      // BRUTE FORCE FIX: Use querySelector (singular) to only grab the very FIRST subtitle layer it finds.
-      // This completely ignores the duplicate shadow layer underneath it.
       const container = document.querySelector(
         ".player-timedtext-text-container, " +
         ".nfp-player-timedtext, " +
@@ -282,12 +252,16 @@
     }
 
     else if (isAmazon) {
-      const els = document.querySelectorAll(
+      // FIX: Brute force querySelector just like Netflix. 
+      // Only grabs the main box, ignoring duplicate child spans.
+      const container = document.querySelector(
         ".atvwebplayersdk-captions-text, " +
-        "[class*='captions-text'] span, " +
-        "[class*='TimedText'] span"
+        "[class*='captions-text'], " +
+        "[class*='TimedText']"
       );
-      text = Array.from(els).map(e => e.textContent).join(" ").trim();
+      if (container) {
+        text = container.textContent;
+      }
     }
 
     else {
@@ -301,7 +275,6 @@
       text = Array.from(els).map(e => e.textContent).join(" ").trim();
     }
 
-    // Collapse whitespace so strings match cleanly
     return text.replace(/\s+/g, " ").trim();
   }
 
