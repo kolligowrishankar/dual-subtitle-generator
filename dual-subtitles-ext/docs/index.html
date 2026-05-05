@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DualSub — German + English Subtitles</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #FFD700; --gold-dim: #B8960C;
+    --bg: #0a0a0f; --surface: #12121a; --surface2: #1a1a28;
+    --text: #f0ede8; --muted: #7a7a9a;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; border-bottom: 1px solid rgba(255,215,0,0.1); }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--gold); }
+  .nav-link { font-size: 0.85rem; color: var(--muted); text-decoration: none; border: 1px solid rgba(255,215,0,0.25); padding: 8px 18px; border-radius: 40px; transition: all 0.2s; }
+  .nav-link:hover { color: var(--gold); border-color: var(--gold); }
+
+  .hero { padding: 80px 0 60px; text-align: center; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.2); border-radius: 40px; padding: 6px 14px; font-size: 0.78rem; color: var(--gold); margin-bottom: 28px; font-weight: 500; }
+  .badge-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+  h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(2.2rem, 6vw, 3.8rem); line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 22px; }
+  h1 span { color: var(--gold); }
+  .subtitle { font-size: 1.05rem; color: var(--muted); max-width: 480px; margin: 0 auto 40px; line-height: 1.6; font-weight: 300; }
+
+  .cta-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary { background: var(--gold); color: #000; font-weight: 700; font-size: 0.9rem; padding: 14px 28px; border-radius: 40px; text-decoration: none; border: none; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: inline-flex; align-items: center; gap: 8px; font-family: 'DM Sans', sans-serif; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(255,215,0,0.3); }
+  .btn-secondary { background: transparent; color: var(--text); font-weight: 500; font-size: 0.9rem; padding: 14px 28px; border-radius: 40px; text-decoration: none; border: 1px solid rgba(255,255,255,0.15); transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-family: 'DM Sans', sans-serif; }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.4); }
+
+  .demo-wrap { margin: 60px 0; }
+  .demo-card { background: var(--surface); border: 1px solid rgba(255,215,0,0.12); border-radius: 16px; overflow: hidden; }
+  .demo-bar { background: var(--surface2); padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .demo-url { font-size: 0.75rem; color: var(--muted); margin-left: 8px; font-family: monospace; }
+  .demo-screen { background: #111; aspect-ratio: 16/6; position: relative; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 24px; }
+  .demo-sub { text-align: center; transition: opacity 0.4s; }
+  .de-line { font-family: 'Syne', sans-serif; font-size: clamp(1rem, 3vw, 1.5rem); font-weight: 700; color: var(--gold); }
+  .en-line { font-size: clamp(0.78rem, 2vw, 1rem); color: #fff; margin-top: 4px; opacity: 0.85; }
+  .demo-label { position: absolute; top: 12px; left: 12px; background: rgba(255,215,0,0.15); border: 1px solid rgba(255,215,0,0.3); color: var(--gold); font-size: 0.7rem; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+
+  .tool-section { padding: 40px 0; }
+  .section-label { font-size: 0.75rem; font-weight: 500; color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+  .section-title { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 700; margin-bottom: 6px; }
+  .section-sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 28px; }
+  .tool-card { background: var(--surface); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 28px; }
+  .input-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  .url-input { flex: 1; background: var(--bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px 16px; color: var(--text); font-size: 0.9rem; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; }
+  .url-input:focus { border-color: var(--gold); }
+  .url-input::placeholder { color: var(--muted); }
+  .go-btn { background: var(--gold); color: #000; border: none; border-radius: 10px; padding: 12px 22px; font-weight: 700; cursor: pointer; font-size: 0.9rem; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; white-space: nowrap; }
+  .go-btn:hover { opacity: 0.85; }
+  .go-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .result-box { background: var(--bg); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px; min-height: 80px; display: none; }
+  .result-box.visible { display: block; }
+  .cue-row { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .cue-row:last-child { border-bottom: none; margin-bottom: 0; }
+  .cue-de { color: var(--gold); font-weight: 600; font-size: 1rem; }
+  .cue-en { color: rgba(255,255,255,0.75); font-size: 0.88rem; margin-top: 2px; }
+  .cue-time { color: var(--muted); font-size: 0.72rem; font-family: monospace; }
+  .status-msg { color: var(--muted); font-size: 0.9rem; text-align: center; padding: 16px; }
+  .err-msg { color: #ff6b6b; }
+
+  .features { padding: 60px 0; }
+  .feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  .feat { background: var(--surface); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 20px; }
+  .feat-icon { font-size: 1.3rem; margin-bottom: 10px; }
+  .feat-title { font-weight: 500; font-size: 0.9rem; margin-bottom: 5px; }
+  .feat-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+  .install { padding: 40px 0 80px; }
+  .steps { display: flex; flex-direction: column; gap: 14px; }
+  .step { display: flex; gap: 16px; align-items: flex-start; background: var(--surface); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 18px; }
+  .step-num { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,215,0,0.12); border: 1px solid rgba(255,215,0,0.3); color: var(--gold); font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-body h4 { font-weight: 500; font-size: 0.93rem; margin-bottom: 4px; }
+  .step-body p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+  .step-body code { background: rgba(255,215,0,0.08); color: var(--gold); padding: 1px 6px; border-radius: 4px; font-size: 0.8rem; }
+  .step-body a { color: var(--gold); }
+
+  footer { border-top: 1px solid rgba(255,255,255,0.07); padding: 24px 0; text-align: center; font-size: 0.8rem; color: var(--muted); }
+  footer a { color: var(--gold); text-decoration: none; }
+
+  @media (max-width: 600px) {
+    .input-row { flex-direction: column; }
+    h1 { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav>
+    <div class="logo">DualSub ✦</div>
+    <a href="https://github.com/kolligowrishankar/dual-subtitle-generator" class="nav-link" target="_blank">★ GitHub</a>
+  </nav>
+
+  <div class="hero">
+    <div class="badge"><span class="badge-dot"></span> Free · No account needed · Open source</div>
+    <h1>Watch German videos.<br><span>Understand every word.</span></h1>
+    <p class="subtitle">Dual subtitles — German on top, English below — on YouTube, Netflix, and Amazon Prime. Built for learners.</p>
+    <div class="cta-group">
+      <a href="https://github.com/kolligowrishankar/dual-subtitle-generator" class="btn-primary" target="_blank">↓ Download Extension</a>
+      <a href="#translate" class="btn-secondary">Try web translator ↓</a>
+    </div>
+  </div>
+
+  <div class="demo-wrap">
+    <div class="demo-card">
+      <div class="demo-bar">
+        <div class="dot" style="background:#ff5f57"></div>
+        <div class="dot" style="background:#febc2e"></div>
+        <div class="dot" style="background:#28c840"></div>
+        <span class="demo-url">youtube.com/watch?v=...</span>
+      </div>
+      <div class="demo-screen">
+        <span class="demo-label">LIVE DEMO</span>
+        <div class="demo-sub" id="demo-sub">
+          <div class="de-line">Ich lerne jeden Tag Deutsch.</div>
+          <div class="en-line">I learn German every day.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tool-section" id="translate">
+    <div class="section-label">Web tool — works on mobile</div>
+    <div class="section-title">Paste a YouTube URL</div>
+    <div class="section-sub">Get German + English subtitles instantly. No extension needed for this tool.</div>
+    <div class="tool-card">
+      <div class="input-row">
+        <input class="url-input" id="yt-url" type="text" placeholder="https://www.youtube.com/watch?v=..." />
+        <button class="go-btn" id="go-btn" onclick="fetchSubs()">Translate →</button>
+      </div>
+      <div class="result-box" id="result-box">
+        <div class="status-msg" id="status-msg">Enter a YouTube URL above</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="feat-grid">
+      <div class="feat"><div class="feat-icon">🎬</div><div class="feat-title">YouTube</div><div class="feat-desc">Reads captions automatically — CC button not required.</div></div>
+      <div class="feat"><div class="feat-icon">📺</div><div class="feat-title">Netflix &amp; Prime</div><div class="feat-desc">Reads German subtitles from the player and adds English below.</div></div>
+      <div class="feat"><div class="feat-icon">✋</div><div class="feat-title">Word hover</div><div class="feat-desc">Pause and hover any German word to see its exact translation.</div></div>
+      <div class="feat"><div class="feat-icon">⚡</div><div class="feat-title">No server needed</div><div class="feat-desc">Runs entirely in Chrome. No login, no data collection.</div></div>
+    </div>
+  </div>
+
+  <div class="install" id="install">
+    <div class="section-label">Desktop install</div>
+    <div class="section-title">3 steps — takes 1 minute</div>
+    <div class="section-sub" style="margin-bottom:20px">Free forever. Chrome Web Store listing coming soon.</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Download the code</h4>
+          <p>Go to <a href="https://github.com/kolligowrishankar/dual-subtitle-generator" target="_blank">github.com/kolligowrishankar/dual-subtitle-generator</a> → click <strong>Code → Download ZIP</strong> → unzip anywhere on your computer.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Open Chrome extensions</h4>
+          <p>In Chrome, open <code>chrome://extensions</code> → enable <strong>Developer mode</strong> (top-right toggle).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Load unpacked</h4>
+          <p>Click <strong>Load unpacked</strong> → select the <code>dual-subtitles-ext</code> folder from the ZIP. Done — open any German YouTube video!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Built by <a href="https://github.com/kolligowrishankar" target="_blank">kolligowrishankar</a> ·
+    <a href="https://github.com/kolligowrishankar/dual-subtitle-generator" target="_blank">Source on GitHub</a> ·
+    Free &amp; open source · MIT licence
+  </footer>
+
+</div>
+<script>
+const demos = [
+  ['Ich lerne jeden Tag Deutsch.','I learn German every day.'],
+  ['Wie heißen Sie, bitte?','What is your name, please?'],
+  ['Das Wetter ist heute schön.','The weather is beautiful today.'],
+  ['Können Sie das wiederholen?','Can you repeat that?'],
+  ['Ich verstehe das noch nicht.','I don\'t understand that yet.'],
+];
+let di = 0;
+const dSub = document.getElementById('demo-sub');
+setInterval(() => {
+  di = (di+1) % demos.length;
+  dSub.style.opacity = 0;
+  setTimeout(() => {
+    dSub.querySelector('.de-line').textContent = demos[di][0];
+    dSub.querySelector('.en-line').textContent = demos[di][1];
+    dSub.style.opacity = 1;
+  }, 400);
+}, 3500);
+
+async function fetchSubs() {
+  const raw = document.getElementById('yt-url').value.trim();
+  const m = raw.match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if (!m) { showErr('Please paste a valid YouTube URL (e.g. youtube.com/watch?v=abc).'); return; }
+  const videoId = m[1];
+  const box = document.getElementById('result-box');
+  const btn = document.getElementById('go-btn');
+  box.classList.add('visible');
+  box.innerHTML = '<div class="status-msg">Fetching subtitles from YouTube…</div>';
+  btn.disabled = true;
+  try {
+    const pageRes = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://www.youtube.com/watch?v=' + videoId + '&hl=en'));
+    const html = await pageRes.text();
+    let tracks = null;
+    const p1 = html.match(/"captionTracks":(\[[\s\S]*?\]),"/);
+    if (p1) { try { tracks = JSON.parse(p1[1]); } catch {} }
+    if (!tracks) {
+      const p2 = html.match(/"playerCaptionsTracklistRenderer":\{"captionTracks":(\[[\s\S]*?\])/);
+      if (p2) { try { tracks = JSON.parse(p2[1]); } catch {} }
+    }
+    if (!tracks || !tracks.length) { showErr('No captions found. This video may not have German subtitles.'); btn.disabled=false; return; }
+    const track = tracks.find(t=>t.languageCode==='de'&&t.kind!=='asr')
+                ||tracks.find(t=>t.languageCode?.startsWith('de')&&t.kind!=='asr')
+                ||tracks.find(t=>t.languageCode==='de')
+                ||tracks.find(t=>t.languageCode?.startsWith('de'))
+                ||tracks[0];
+    box.innerHTML = '<div class="status-msg">Translating cues…</div>';
+    const tRes = await fetch('https://corsproxy.io/?' + encodeURIComponent(track.baseUrl + '&fmt=json3'));
+    const data = await tRes.json();
+    const cues = (data.events||[]).filter(e=>e.segs).map(e=>({
+      t: Math.floor((e.tStartMs||0)/1000),
+      de: e.segs.map(s=>s.utf8||'').join('').replace(/\n/g,' ').trim()
+    })).filter(c=>c.de).slice(0,50);
+    const results = [];
+    for (let i=0;i<cues.length;i+=8) {
+      const chunk = cues.slice(i,i+8);
+      const translations = await Promise.all(chunk.map(async c => {
+        try {
+          const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=de&tl=en&dt=t&q=${encodeURIComponent(c.de)}`);
+          const d = await r.json();
+          return d[0].map(x=>x[0]).join('');
+        } catch { return c.de; }
+      }));
+      chunk.forEach((c,j) => results.push({...c, en: translations[j]}));
+      renderResults(results, cues.length);
+    }
+    btn.disabled = false;
+  } catch(e) {
+    showErr('Could not load subtitles. Please try a different video.'); btn.disabled = false;
+  }
+}
+
+function fmt(s) { const m=Math.floor(s/60); return m+':'+String(s%60).padStart(2,'0'); }
+
+function renderResults(results, total) {
+  const box = document.getElementById('result-box');
+  const note = total > results.length ? `<div class="status-msg" style="font-size:.78rem;margin-top:8px">Showing first ${results.length} of ${total} cues</div>` : '';
+  box.innerHTML = results.map(c=>`<div class="cue-row"><div class="cue-time">${fmt(c.t)}</div><div class="cue-de">${c.de}</div><div class="cue-en">${c.en}</div></div>`).join('') + note;
+}
+
+function showErr(msg) {
+  const box = document.getElementById('result-box');
+  box.classList.add('visible');
+  box.innerHTML = `<div class="status-msg err-msg">${msg}</div>`;
+}
+
+document.getElementById('yt-url').addEventListener('keydown', e => { if(e.key==='Enter') fetchSubs(); });
+</script>
+</body>
+</html>
