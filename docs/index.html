@@ -192,35 +192,45 @@ async function fetchSubs() {
   const raw = document.getElementById('yt-url').value.trim();
   const m = raw.match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
   if (!m) { showErr('Please paste a valid YouTube URL (e.g. youtube.com/watch?v=abc).'); return; }
+  
   const videoId = m[1];
   const box = document.getElementById('result-box');
   const btn = document.getElementById('go-btn');
+  
   box.classList.add('visible');
   box.innerHTML = '<div class="status-msg">Fetching subtitles from YouTube…</div>';
   btn.disabled = true;
+  
   try {
-    const pageRes = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://www.youtube.com/watch?v=' + videoId + '&hl=en'));
+    const targetUrl = 'https://www.youtube.com/watch?v=' + videoId + '&hl=en&bpctr=9999999999&has_ig=1';
+    const pageRes = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl));
     const html = await pageRes.text();
+    
     let tracks = null;
-    const p1 = html.match(/"captionTracks":(\[[\s\S]*?\]),"/);
+    const p1 = html.match(/"captionTracks":\s*(\[.*?\])/);
     if (p1) { try { tracks = JSON.parse(p1[1]); } catch {} }
-    if (!tracks) {
-      const p2 = html.match(/"playerCaptionsTracklistRenderer":\{"captionTracks":(\[[\s\S]*?\])/);
-      if (p2) { try { tracks = JSON.parse(p2[1]); } catch {} }
+    
+    if (!tracks || !tracks.length) { 
+      showErr('YouTube proxy blocked the request. Please install the official Chrome Extension above instead!'); 
+      btn.disabled=false; 
+      return; 
     }
-    if (!tracks || !tracks.length) { showErr('No captions found. This video may not have German subtitles.'); btn.disabled=false; return; }
+    
     const track = tracks.find(t=>t.languageCode==='de'&&t.kind!=='asr')
                 ||tracks.find(t=>t.languageCode?.startsWith('de')&&t.kind!=='asr')
                 ||tracks.find(t=>t.languageCode==='de')
                 ||tracks.find(t=>t.languageCode?.startsWith('de'))
                 ||tracks[0];
+                
     box.innerHTML = '<div class="status-msg">Translating cues…</div>';
-    const tRes = await fetch('https://corsproxy.io/?' + encodeURIComponent(track.baseUrl + '&fmt=json3'));
+    
+    const tRes = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(track.baseUrl + '&fmt=json3'));
     const data = await tRes.json();
     const cues = (data.events||[]).filter(e=>e.segs).map(e=>({
       t: Math.floor((e.tStartMs||0)/1000),
       de: e.segs.map(s=>s.utf8||'').join('').replace(/\n/g,' ').trim()
     })).filter(c=>c.de).slice(0,50);
+    
     const results = [];
     for (let i=0;i<cues.length;i+=8) {
       const chunk = cues.slice(i,i+8);
@@ -236,7 +246,8 @@ async function fetchSubs() {
     }
     btn.disabled = false;
   } catch(e) {
-    showErr('Could not load subtitles. Please try a different video.'); btn.disabled = false;
+    showErr('Network error with the proxy. Please use the Chrome Extension for a stable connection.'); 
+    btn.disabled = false;
   }
 }
 
