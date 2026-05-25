@@ -1,16 +1,17 @@
 /**
- * background.js — service worker
+ * background.js — service worker (subtitles-backend companion)
  *
  * Fetches subtitle data from the local FastAPI server on behalf of
- * content scripts. Content scripts cannot reach 127.0.0.1 directly
- * (Chrome Private Network Access policy), but background service
- * workers can.
+ * content scripts, forwarding language parameters.
  */
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type !== "FETCH_SUBTITLES") return false;
 
-  const url = `http://127.0.0.1:8000/subtitles/${msg.videoId}`;
+  const sourceLang = msg.sourceLang || "auto";
+  const targetLang = msg.targetLang || "en";
+  const url = `http://127.0.0.1:8000/subtitles/${msg.videoId}?source_lang=${sourceLang}&target_lang=${targetLang}`;
+
   console.log(`[DualSub BG] Fetching ${url}`);
 
   fetch(url)
@@ -21,5 +22,5 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     .then(data => sendResponse({ ok: true, data }))
     .catch(err => sendResponse({ ok: false, error: err.message }));
 
-  return true; // keep message channel open for async response
+  return true;
 });

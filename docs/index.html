@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DualSub — German + English Subtitles</title>
+<title>DualSub — Real-time Dual Subtitle Translator</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -25,7 +25,7 @@
 
   h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(2.2rem, 6vw, 3.8rem); line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 22px; }
   h1 span { color: var(--gold); }
-  .subtitle { font-size: 1.05rem; color: var(--muted); max-width: 480px; margin: 0 auto 40px; line-height: 1.6; font-weight: 300; }
+  .subtitle { font-size: 1.05rem; color: var(--muted); max-width: 520px; margin: 0 auto 40px; line-height: 1.6; font-weight: 300; }
 
   .cta-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
   .btn-primary { background: var(--gold); color: #000; font-weight: 700; font-size: 0.9rem; padding: 14px 28px; border-radius: 40px; text-decoration: none; border: none; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: inline-flex; align-items: center; gap: 8px; font-family: 'DM Sans', sans-serif; }
@@ -38,8 +38,8 @@
   .demo-url { font-size: 0.75rem; color: var(--muted); margin-left: 8px; font-family: monospace; }
   .demo-screen { background: #111; aspect-ratio: 16/6; position: relative; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 24px; }
   .demo-sub { text-align: center; transition: opacity 0.4s; }
-  .de-line { font-family: 'Syne', sans-serif; font-size: clamp(1rem, 3vw, 1.5rem); font-weight: 700; color: var(--gold); }
-  .en-line { font-size: clamp(0.78rem, 2vw, 1rem); color: #fff; margin-top: 4px; opacity: 0.85; }
+  .src-line { font-family: 'Syne', sans-serif; font-size: clamp(1rem, 3vw, 1.5rem); font-weight: 700; color: var(--gold); }
+  .tgt-line { font-size: clamp(0.78rem, 2vw, 1rem); color: #fff; margin-top: 4px; opacity: 0.85; }
   .demo-label { position: absolute; top: 12px; left: 12px; background: rgba(255,215,0,0.15); border: 1px solid rgba(255,215,0,0.3); color: var(--gold); font-size: 0.7rem; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
 
   .features { padding: 40px 0 60px; }
@@ -75,10 +75,11 @@
 
   <div class="hero">
     <div class="badge"><span class="badge-dot"></span> Free · No account needed</div>
-    <h1>Watch German videos.<br><span>Understand every word.</span></h1>
-    <p class="subtitle">Dual subtitles — German on top, English below — on YouTube, Netflix, and Amazon Prime. Built for learners.</p>
+    <h1>Watch global content.<br><span>Understand every language.</span></h1>
+    <p class="subtitle">Dual subtitles — any source language on top, your target translation below — on YouTube, Netflix, and Amazon Prime. Built for language learners worldwide.</p>
     <div class="cta-group">
-      <a href="https://chromewebstore.google.com/detail/hedabnnhomiofblenpnobejfkalbeici" class="btn-primary" target="_blank">Add to Chrome</a>
+      <!-- Fixed real public extension link -->
+      <a href="https://chromewebstore.google.com/detail/dualsub-%E2%80%94-dual-subtitle-t/hedabnnhomiofblenpnobejfkalbeici" class="btn-primary" target="_blank">Add to Chrome</a>
     </div>
   </div>
 
@@ -88,13 +89,13 @@
         <div class="dot" style="background:#ff5f57"></div>
         <div class="dot" style="background:#febc2e"></div>
         <div class="dot" style="background:#28c840"></div>
-        <span class="demo-url">youtube.com/watch?v=...</span>
+        <span class="demo-url">video-streaming-platform.com/watch...</span>
       </div>
       <div class="demo-screen">
         <span class="demo-label">LIVE DEMO</span>
         <div class="demo-sub" id="demo-sub">
-          <div class="de-line">Ich lerne jeden Tag Deutsch.</div>
-          <div class="en-line">I learn German every day.</div>
+          <div class="src-line">Ich lerne jeden Tag Deutsch.</div>
+          <div class="tgt-line">I learn German every day.</div>
         </div>
       </div>
     </div>
@@ -102,10 +103,10 @@
 
   <div class="features">
     <div class="feat-grid">
-      <div class="feat"><div class="feat-icon">🎬</div><div class="feat-title">YouTube</div><div class="feat-desc">Reads captions automatically — CC button not required.</div></div>
-      <div class="feat"><div class="feat-icon">📺</div><div class="feat-title">Netflix &amp; Prime</div><div class="feat-desc">Reads German subtitles from the player and adds English below.</div></div>
-      <div class="feat"><div class="feat-icon">✋</div><div class="feat-title">Word hover</div><div class="feat-desc">Pause and hover any German word to see its exact translation.</div></div>
-      <div class="feat"><div class="feat-icon">⚡</div><div class="feat-title">No server needed</div><div class="feat-desc">Runs entirely in Chrome. No login, no data collection.</div></div>
+      <div class="feat"><div class="feat-icon">🎬</div><div class="feat-title">YouTube</div><div class="feat-desc">Reads captions automatically — completely integrated with SPA tracking.</div></div>
+      <div class="feat"><div class="feat-icon">📺</div><div class="feat-title">Netflix &amp; Prime</div><div class="feat-desc">Reads target stream markers directly from the player and anchors translation pairs.</div></div>
+      <div class="feat"><div class="feat-icon">✋</div><div class="feat-title">Word hover</div><div class="feat-desc">Pause video elements and hover over any unfamiliar word for instant breakdown definitions.</div></div>
+      <div class="feat"><div class="feat-icon">⚡</div><div class="feat-title">Customizable Canvas</div><div class="feat-desc">Configure layout typography sizing and vertical height balancing via sliders.</div></div>
     </div>
   </div>
 
@@ -118,8 +119,9 @@
         <div class="step-num">✓</div>
         <div class="step-body">
           <h4>Available on the Chrome Web Store</h4>
-          <p>DualSub is officially verified and published by Google. Just click the button below to install it instantly.</p>
-          <a href="https://chromewebstore.google.com/detail/hedabnnhomiofblenpnobejfkalbeici" class="btn-primary" target="_blank" style="padding: 10px 20px; font-size: 0.8rem;">Go to Web Store</a>
+          <p>DualSub is officially built using Chrome Manifest V3 extension standards. Just click the button below to install it instantly.</p>
+          <!-- Fixed real public extension link -->
+          <a href="https://chromewebstore.google.com/detail/dualsub-%E2%80%94-dual-subtitle-t/hedabnnhomiofblenpnobejfkalbeici" class="btn-primary" target="_blank" style="padding: 10px 20px; font-size: 0.8rem;">Go to Web Store</a>
         </div>
       </div>
     </div>
@@ -132,11 +134,11 @@
 </div>
 <script>
 const demos = [
-  ['Ich lerne jeden Tag Deutsch.','I learn German every day.'],
-  ['Wie heißen Sie, bitte?','What is your name, please?'],
-  ['Das Wetter ist heute schön.','The weather is beautiful today.'],
-  ['Können Sie das wiederholen?','Can you repeat that?'],
-  ['Ich verstehe das noch nicht.','I don\'t understand that yet.'],
+  ['Ich lerne jeden Tag Deutsch.', 'I learn German every day.'],
+  ['Bonjour, comment ça va aujourd’hui?', 'Hello, how are you doing today?'],
+  ['La vida es hermosa cuando aprendes algo nuevo.', 'Life is beautiful when you learn something new.'],
+  ['日本の文化とアニメが大好きです。', 'I love Japanese culture and anime.'],
+  ['मुझे नई भाषाएं सीखना बहुत पसंद है।', 'I love learning new languages.']
 ];
 let di = 0;
 const dSub = document.getElementById('demo-sub');
@@ -144,8 +146,8 @@ setInterval(() => {
   di = (di+1) % demos.length;
   dSub.style.opacity = 0;
   setTimeout(() => {
-    dSub.querySelector('.de-line').textContent = demos[di][0];
-    dSub.querySelector('.en-line').textContent = demos[di][1];
+    dSub.querySelector('.src-line').textContent = demos[di][0];
+    dSub.querySelector('.tgt-line').textContent = demos[di][1];
     dSub.style.opacity = 1;
   }, 400);
 }, 3500);

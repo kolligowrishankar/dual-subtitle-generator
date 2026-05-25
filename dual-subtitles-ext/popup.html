@@ -4,13 +4,15 @@
   <meta charset="UTF-8">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      width: 300px;
+      width: 310px;
       font-family: 'Segoe UI', Arial, sans-serif;
       background: #0f0f18;
       color: #f0ede8;
     }
 
+    /* ── Header ── */
     .header {
       background: linear-gradient(135deg, #1a1a2e, #16213e);
       padding: 18px 16px 14px;
@@ -23,6 +25,7 @@
     .logo span { color: #fff; font-weight: 300; }
     .tagline { font-size: 11px; color: #6a6a8a; margin-top: 2px; }
 
+    /* ── Status bar ── */
     .status-bar {
       display: flex; align-items: center; gap: 8px;
       padding: 10px 16px;
@@ -37,8 +40,89 @@
     @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.4} }
     .status-text { font-size: 12px; color: #7a9a7a; }
 
+    /* ── Language selector ── */
+    .lang-section {
+      padding: 14px 16px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .lang-label {
+      font-size: 10px; color: #5a5a7a;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+    .lang-row {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .lang-group {
+      display: flex; flex-direction: column; gap: 4px; flex: 1;
+    }
+    .lang-group label {
+      font-size: 10px; color: #7a7a9a; letter-spacing: 0.04em;
+    }
+    select {
+      width: 100%;
+      background: #1a1a2e;
+      color: #f0ede8;
+      border: 1px solid rgba(255,215,0,0.2);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23FFD700'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      padding-right: 24px;
+      transition: border-color 0.2s;
+    }
+    select:focus { border-color: rgba(255,215,0,0.5); }
+    select:hover { border-color: rgba(255,215,0,0.35); }
+
+    .swap-btn {
+      background: rgba(255,215,0,0.1);
+      border: 1px solid rgba(255,215,0,0.2);
+      color: #FFD700;
+      border-radius: 6px;
+      width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      flex-shrink: 0;
+      align-self: flex-end;
+      margin-bottom: 1px;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .swap-btn:hover { background: rgba(255,215,0,0.22); transform: rotate(180deg); }
+
+    .apply-btn {
+      margin-top: 12px;
+      width: 100%;
+      background: linear-gradient(135deg, #c8a800, #FFD700);
+      color: #0f0f18;
+      border: none;
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 12.5px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .apply-btn:hover { opacity: 0.9; }
+    .apply-btn:active { transform: scale(0.98); }
+
+    .apply-btn.saved {
+      background: linear-gradient(135deg, #1a6b3a, #4caf50);
+      color: #fff;
+    }
+
+    /* ── Platforms ── */
     .platforms {
-      padding: 14px 16px;
+      padding: 12px 16px;
       border-bottom: 1px solid rgba(255,255,255,0.05);
     }
     .platforms-label { font-size: 10px; color: #5a5a7a; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
@@ -51,6 +135,7 @@
     .nf  { background: rgba(229,9,20,0.1);   color: #e87070; border-color: rgba(229,9,20,0.2); }
     .amz { background: rgba(0,168,224,0.1);  color: #6bcde8; border-color: rgba(0,168,224,0.2); }
 
+    /* ── Tips ── */
     .tips {
       padding: 12px 16px;
       border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -60,6 +145,7 @@
     .tip:last-child { margin-bottom: 0; }
     .tip-icon { color: #FFD700; font-size: 12px; flex-shrink: 0; margin-top: 1px; }
 
+    /* ── Footer ── */
     .footer {
       padding: 10px 16px;
       display: flex; align-items: center; justify-content: space-between;
@@ -72,13 +158,124 @@
 <body>
 
   <div class="header">
-    <div class="logo">DualSub <span>✦ Dual Subtitle Generator</span></div>
-    <div class="tagline">German + English · Real-time translation</div>
+    <div class="logo">DualSub <span>✦ Dual Subtitle Translator</span></div>
+    <div class="tagline">Real-time translation · Any language pair</div>
   </div>
 
   <div class="status-bar">
     <div class="status-dot"></div>
     <div class="status-text">Extension active on this tab</div>
+  </div>
+
+  <div class="lang-section">
+    <div class="lang-label">Translation language pair</div>
+    <div class="lang-row">
+      <div class="lang-group">
+        <label>SOURCE (subtitle language)</label>
+        <select id="sourceLang">
+          <option value="auto">🌐 Auto-detect</option>
+          <option value="de">🇩🇪 German</option>
+          <option value="fr">🇫🇷 French</option>
+          <option value="es">🇪🇸 Spanish</option>
+          <option value="it">🇮🇹 Italian</option>
+          <option value="pt">🇵🇹 Portuguese</option>
+          <option value="nl">🇳🇱 Dutch</option>
+          <option value="pl">🇵🇱 Polish</option>
+          <option value="ru">🇷🇺 Russian</option>
+          <option value="ja">🇯🇵 Japanese</option>
+          <option value="zh-CN">🇨🇳 Chinese (Simp.)</option>
+          <option value="zh-TW">🇹🇼 Chinese (Trad.)</option>
+          <option value="ko">🇰🇷 Korean</option>
+          <option value="ar">🇸🇦 Arabic</option>
+          <option value="tr">🇹🇷 Turkish</option>
+          <option value="sv">🇸🇪 Swedish</option>
+          <option value="da">🇩🇰 Danish</option>
+          <option value="fi">🇫🇮 Finnish</option>
+          <option value="no">🇳🇴 Norwegian</option>
+          <option value="cs">🇨🇿 Czech</option>
+          <option value="hu">🇭🇺 Hungarian</option>
+          <option value="ro">🇷🇴 Romanian</option>
+          <option value="el">🇬🇷 Greek</option>
+          <option value="he">🇮🇱 Hebrew</option>
+          <option value="hi">🇮🇳 Hindi</option>
+          <option value="th">🇹🇭 Thai</option>
+          <option value="vi">🇻🇳 Vietnamese</option>
+          <option value="id">🇮🇩 Indonesian</option>
+          <option value="uk">🇺🇦 Ukrainian</option>
+        </select>
+      </div>
+
+      <button class="swap-btn" id="swapBtn" title="Swap languages">⇄</button>
+
+      <div class="lang-group">
+        <label>TARGET (your language)</label>
+        <select id="targetLang">
+          <option value="en">🇬🇧 English</option>
+          <option value="de">🇩🇪 German</option>
+          <option value="fr">🇫🇷 French</option>
+          <option value="es">🇪🇸 Spanish</option>
+          <option value="it">🇮🇹 Italian</option>
+          <option value="pt">🇵🇹 Portuguese</option>
+          <option value="nl">🇳🇱 Dutch</option>
+          <option value="pl">🇵🇱 Polish</option>
+          <option value="ru">🇷🇺 Russian</option>
+          <option value="ja">🇯🇵 Japanese</option>
+          <option value="zh-CN">🇨🇳 Chinese (Simp.)</option>
+          <option value="zh-TW">🇹🇼 Chinese (Trad.)</option>
+          <option value="ko">🇰🇷 Korean</option>
+          <option value="ar">🇸🇦 Arabic</option>
+          <option value="tr">🇹🇷 Turkish</option>
+          <option value="sv">🇸🇪 Swedish</option>
+          <option value="da">🇩🇰 Danish</option>
+          <option value="fi">🇫🇮 Finnish</option>
+          <option value="no">🇳🇴 Norwegian</option>
+          <option value="cs">🇨🇿 Czech</option>
+          <option value="hu">🇭🇺 Hungarian</option>
+          <option value="ro">🇷🇴 Romanian</option>
+          <option value="el">🇬🇷 Greek</option>
+          <option value="he">🇮🇱 Hebrew</option>
+          <option value="hi">🇮🇳 Hindi</option>
+          <option value="th">🇹🇭 Thai</option>
+          <option value="vi">🇻🇳 Vietnamese</option>
+          <option value="id">🇮🇩 Indonesian</option>
+          <option value="uk">🇺🇦 Ukrainian</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="apply-btn" id="applyBtn">Apply Language Pair</button>
+  </div>
+
+  <!-- Customization Section -->
+  <div class="lang-section" style="border-top: none; padding-top: 0;">
+    <div class="lang-label">Subtitle Display Customization</div>
+    <div class="lang-row" style="flex-direction: column; gap: 12px; align-items: stretch;">
+      
+      <div class="lang-group">
+        <label style="display: flex; justify-content: space-between; width: 100%;">
+          <span>SOURCE FONT SIZE</span>
+          <span id="sourceSizeVal" style="color: #FFD700; font-weight: 700;">28px</span>
+        </label>
+        <input type="range" id="sourceFontSize" min="16" max="48" value="28" style="width: 100%; accent-color: #FFD700; cursor: pointer; margin-top: 4px;">
+      </div>
+
+      <div class="lang-group">
+        <label style="display: flex; justify-content: space-between; width: 100%;">
+          <span>TARGET FONT SIZE</span>
+          <span id="targetSizeVal" style="color: #FFD700; font-weight: 700;">20px</span>
+        </label>
+        <input type="range" id="targetFontSize" min="12" max="36" value="20" style="width: 100%; accent-color: #FFD700; cursor: pointer; margin-top: 4px;">
+      </div>
+
+      <div class="lang-group">
+        <label style="display: flex; justify-content: space-between; width: 100%;">
+          <span>VERTICAL POSITION</span>
+          <span id="posVal" style="color: #FFD700; font-weight: 700;">+0px</span>
+        </label>
+        <input type="range" id="subPosition" min="-50" max="300" value="0" style="width: 100%; accent-color: #FFD700; cursor: pointer; margin-top: 4px;">
+      </div>
+
+    </div>
   </div>
 
   <div class="platforms">
@@ -94,22 +291,23 @@
     <div class="tips-label">How to use</div>
     <div class="tip">
       <span class="tip-icon">▶</span>
-      <span><b style="color:#ddd">YouTube:</b> Open any German video — subtitles appear automatically.</span>
+      <span><b style="color:#ddd">YouTube:</b> Open a video with subtitles — the overlay appears automatically.</span>
     </div>
     <div class="tip">
       <span class="tip-icon">📺</span>
-      <span><b style="color:#ddd">Netflix / Prime:</b> Enable German subtitles in the player first.</span>
+      <span><b style="color:#ddd">Netflix / Prime:</b> Enable subtitles in the player first, then DualSub adds the translation.</span>
     </div>
     <div class="tip">
       <span class="tip-icon">✋</span>
-      <span><b style="color:#ddd">Word hover:</b> Pause the video and hover any German word to see its translation.</span>
+      <span><b style="color:#ddd">Word hover:</b> Pause the video and hover any word for its translation.</span>
     </div>
   </div>
 
   <div class="footer">
-    <span class="version">v1.0.0</span>
+    <span class="version">v2.2.0</span>
     <a class="gh-link" href="https://kolligowrishankar.github.io/dual-subtitle-generator" target="_blank">🌐 Website</a>
   </div>
 
+  <script src="popup.js"></script>
 </body>
 </html>
